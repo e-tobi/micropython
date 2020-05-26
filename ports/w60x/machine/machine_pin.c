@@ -45,6 +45,20 @@ enum mp_pin_mode {
   GPIO_MODE_OPEN_DRAIN = 3 // SDK has no matching WM_GPIO_DIR!
 };
 
+/*
+ * WM_GPIO_IRQ_TRIG_RISING_EDGE  == GPIO_IRQ_RISING - 1
+ * WM_GPIO_IRQ_TRIG_FALLING_EDGE == GPIO_IRQ_FALLING - 1
+ * WM_GPIO_IRQ_TRIG_DOUBLE_EDGE  == (GPIO_IRQ_RISING | GPIO_IRQ_FALLING)
+ * WM_GPIO_IRQ_TRIG_HIGH_LEVEL == GPIO_IRQ_HIGH_LEVEL - 1
+ * WM_GPIO_IRQ_TRIG_HIGH_LEVEL == GPIO_IRQ_LOW_LEVEL - 1
+ */
+enum mp_pin_irq_mode {
+  GPIO_IRQ_RISING = WM_GPIO_IRQ_TRIG_RISING_EDGE + 1,    // 1
+  GPIO_IRQ_FALLING = WM_GPIO_IRQ_TRIG_FALLING_EDGE + 1,  // 2
+  GPIO_IRQ_HIGH_LEVEL = WM_GPIO_IRQ_TRIG_HIGH_LEVEL + 1, // 4
+  GPIO_IRQ_LOW_LEVEL = WM_GPIO_IRQ_TRIG_LOW_LEVEL  + 1,  // 5
+};
+
 typedef struct _machine_pin_obj_t {
     mp_obj_base_t base;
     enum tls_io_name id;
@@ -322,7 +336,7 @@ STATIC mp_obj_t machine_pin_irq(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         MP_STATE_PORT(machine_pin_irq_handler)[self->id] = handler;
         tls_gpio_isr_register(self->id, machine_pin_irq_callback, self);
-        tls_gpio_irq_enable(self->id, trigger);
+        tls_gpio_irq_enable(self->id, trigger - 1);
     }
 
     // return the irq object
@@ -346,11 +360,10 @@ STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PULL_UP), MP_ROM_INT(WM_GPIO_ATTR_PULLHIGH) },
     { MP_ROM_QSTR(MP_QSTR_PULL_DOWN), MP_ROM_INT(WM_GPIO_ATTR_PULLLOW) },
     { MP_ROM_QSTR(MP_QSTR_PULL_NONE), MP_ROM_INT(WM_GPIO_ATTR_FLOATING) },
-    { MP_ROM_QSTR(MP_QSTR_IRQ_DOUBLE_EDGE), MP_ROM_INT(WM_GPIO_IRQ_TRIG_DOUBLE_EDGE) },
-    { MP_ROM_QSTR(MP_QSTR_IRQ_RISING), MP_ROM_INT(WM_GPIO_IRQ_TRIG_RISING_EDGE) },
-    { MP_ROM_QSTR(MP_QSTR_IRQ_FALLING), MP_ROM_INT(WM_GPIO_IRQ_TRIG_FALLING_EDGE) },
-    { MP_ROM_QSTR(MP_QSTR_IRQ_HIGH_LEVEL), MP_ROM_INT(WM_GPIO_IRQ_TRIG_HIGH_LEVEL) },
-    { MP_ROM_QSTR(MP_QSTR_IRQ_LOW_LEVEL), MP_ROM_INT(WM_GPIO_IRQ_TRIG_LOW_LEVEL) },
+    { MP_ROM_QSTR(MP_QSTR_IRQ_RISING), MP_ROM_INT(GPIO_IRQ_RISING) },
+    { MP_ROM_QSTR(MP_QSTR_IRQ_FALLING), MP_ROM_INT(GPIO_IRQ_FALLING) },
+    { MP_ROM_QSTR(MP_QSTR_IRQ_HIGH_LEVEL), MP_ROM_INT(GPIO_IRQ_HIGH_LEVEL) },
+    { MP_ROM_QSTR(MP_QSTR_IRQ_LOW_LEVEL), MP_ROM_INT(GPIO_IRQ_LOW_LEVEL) },
 
     { MP_ROM_QSTR(MP_QSTR_PA_00), MP_ROM_INT(WM_IO_PA_00) },
     { MP_ROM_QSTR(MP_QSTR_PA_01), MP_ROM_INT(WM_IO_PA_01) },
@@ -522,7 +535,7 @@ STATIC mp_obj_t machine_pin_irq_trigger(size_t n_args, const mp_obj_t *args) {
 
     if (n_args == 2) {
         // set trigger
-        tls_gpio_irq_enable(self->id, mp_obj_get_int(args[1]));
+        tls_gpio_irq_enable(self->id, mp_obj_get_int(args[1]) - 1);
     }
     // return irq status
     return MP_OBJ_NEW_SMALL_INT(tls_get_gpio_irq_status(self->id));
