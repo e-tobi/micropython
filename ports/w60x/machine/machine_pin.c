@@ -335,8 +335,13 @@ STATIC mp_obj_t machine_pin_irq(size_t n_args, const mp_obj_t *pos_args, mp_map_
         }
 
         MP_STATE_PORT(machine_pin_irq_handler)[self->id] = handler;
-        tls_gpio_isr_register(self->id, machine_pin_irq_callback, self);
-        tls_gpio_irq_enable(self->id, trigger - 1);
+        if (handler != MP_OBJ_NULL) {
+            tls_gpio_isr_register(self->id, machine_pin_irq_callback, self);
+            tls_gpio_irq_enable(self->id, trigger - 1);
+        } else {
+            tls_gpio_irq_disable(self->id);
+            tls_gpio_isr_register(self->id, 0, 0);
+        }
     }
 
     // return the irq object
