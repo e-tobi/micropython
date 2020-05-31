@@ -100,7 +100,7 @@ mp_state_thread_t *mp_thread_get_state(void) {
     return (mp_state_thread_t *)p;
 }
 
-void mp_thread_set_state(void *state) {
+void mp_thread_set_state(struct _mp_state_thread_t *state) {
     mp_thread_mutex_lock(&thread_mutex, 1);
     for (thread_t *th = thread; th != NULL; th = th->next) {
         if (th->id == xTaskGetCurrentTaskHandle()) {
