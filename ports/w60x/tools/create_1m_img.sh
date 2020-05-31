@@ -49,9 +49,9 @@ main()
 usage()
 {
 	echo -ne "\n$0 [-e ENV | -r RVERSION | -h]\n\n"
-	echo -ne "\t-e ENV   Compiler Environment, default is NOT SETTED\n"
+	echo -ne "\t-e ENV   Compiler Environment, default is NOT SET\n"
 	echo -ne "\t-h       This help information\n"
-	echo -ne "\t-r REVISION    SVN-Reversion number, default is NOT SETTED\n"
+	echo -ne "\t-r REVISION    SVN-Reversion number, default is NOT SET\n"
 	echo -ne "\n"
 }
 
