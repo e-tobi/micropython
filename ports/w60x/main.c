@@ -205,9 +205,9 @@ static void mpy_task(void *param) {
 
     // Allocate the uPy heap using malloc and get the largest available region
 #ifdef W60X_USE_MBEDTLS_SSL
-    u32 mp_task_heap_size = 36 * 1024;
+    u32 mp_task_heap_size = (tls_mem_get_avail_heapsize() * 4) / 10; // 40%
 #else
-    u32 mp_task_heap_size = tls_mem_get_avail_heapsize() / 2;
+    u32 mp_task_heap_size = (tls_mem_get_avail_heapsize() * 6) / 10; // 60%
 #endif
     //printf("mp_task_heap_size = %u\r\n", mp_task_heap_size);
 
