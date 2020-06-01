@@ -159,8 +159,32 @@ STATIC mp_obj_t machine_uart_init(size_t n_args, const mp_obj_t *args, mp_map_t 
 }
 MP_DEFINE_CONST_FUN_OBJ_KW(machine_uart_init_obj, 1, machine_uart_init);
 
+extern struct tls_uart_port uart_port[3];
+
+STATIC mp_obj_t machine_uart_any(mp_obj_t self_in) {
+    machine_uart_obj_t *self = MP_OBJ_TO_PTR(self_in);
+
+    int data_cnt;
+    struct tls_uart_port *port = NULL;
+    struct tls_uart_circ_buf *recv;
+
+    if (TLS_UART_0 == self->uart_num)
+        port = &uart_port[0];
+    else if (TLS_UART_1 == self->uart_num)
+        port = &uart_port[1];
+    else if (TLS_UART_2 == self->uart_num)
+       port = &uart_port[2];
+
+    recv = &port->recv;
+    data_cnt = CIRC_CNT(recv->head, recv->tail, TLS_UART_RX_BUF_SIZE);
+
+    return MP_OBJ_NEW_SMALL_INT(data_cnt);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_any_obj, machine_uart_any);
+
 STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_uart_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_any), MP_ROM_PTR(&machine_uart_any_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&mp_stream_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_readline), MP_ROM_PTR(&mp_stream_unbuffered_readline_obj) },
