@@ -34,7 +34,7 @@
 
 #include "mpthreadport.h"
 
-OS_STK mpy_task_stk[MPY_TASK_SIZE];
+OS_STK mpy_task_stk[MPY_STACK_LEN];
 
 #if MICROPY_USE_INTERVAL_FLS_FS
 fs_user_mount_t *spi_fls_vfs = NULL;
@@ -198,7 +198,7 @@ static void mpy_task(void *param) {
     volatile uint32_t sp = (uint32_t)get_sp();
 
 #if MICROPY_PY_THREAD
-    mp_thread_init(mpy_task_stk, MPY_TASK_SIZE);
+    mp_thread_init(mpy_task_stk, MPY_STACK_LEN);
 #endif
 
     uart_init();
@@ -216,7 +216,7 @@ static void mpy_task(void *param) {
 soft_reset:
     // initialise the stack pointer for the main thread
     mp_stack_set_top((void *)sp);
-    mp_stack_set_limit(MPY_TASK_SIZE * sizeof(OS_STK));
+    mp_stack_set_limit(MPY_STACK_SIZE - 1024);
     gc_init(mp_task_heap, mp_task_heap + mp_task_heap_size);
     mp_init();
     mp_obj_list_init(mp_sys_path, 0);
@@ -267,7 +267,7 @@ soft_reset:
 
 void UserMain(void) {
     tls_os_task_create(NULL, "w60xmpy", mpy_task, NULL,
-                       (void *)mpy_task_stk, sizeof(mpy_task_stk),
+                       (void *)mpy_task_stk, MPY_STACK_SIZE,
                        MPY_TASK_PRIO, 0);
 }
 
